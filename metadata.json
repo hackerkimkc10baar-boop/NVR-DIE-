@@ -1,0 +1,6 @@
+{
+  "name": "Armora FPS Booster",
+  "description": "Desktop gaming performance booster and background settings optimizer for Free Fire, BlueStacks, and PC games.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
