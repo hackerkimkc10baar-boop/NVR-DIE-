@@ -1,13 +1,14 @@
 import React from 'react';
-import { Volume2, VolumeX, Minus, Square, X, Zap, Crown, Flower2 } from 'lucide-react';
+import { Volume2, VolumeX, Minus, Square, X, Zap, Crown, Flower2, Github } from 'lucide-react';
 import { useBooster } from '../context/BoosterContext.tsx';
+import { sound } from '../utils/audio.ts';
 
 interface WindowHeaderProps {
   onCloseClick?: () => void;
 }
 
 export const WindowHeader: React.FC<WindowHeaderProps> = ({ onCloseClick }) => {
-  const { isMuted, toggleMute, stats, isLoggedIn, logout } = useBooster();
+  const { isMuted, toggleMute, stats, isLoggedIn, logout, setActiveTab } = useBooster();
 
   return (
     <header className="h-11 bg-[#160a14] border-b border-pink-900/40 px-4 flex items-center justify-between select-none shrink-0 z-30">
@@ -36,6 +37,19 @@ export const WindowHeader: React.FC<WindowHeaderProps> = ({ onCloseClick }) => {
 
       {/* Right controls */}
       <div className="flex items-center gap-2 text-pink-300/70">
+        {/* GitHub EXE Release Quick Access */}
+        <button
+          onClick={() => {
+            sound.playClick();
+            setActiveTab('settings_exe');
+          }}
+          title="DOWNLOAD NEVERDIE.EXE ON GITHUB"
+          className="px-2 py-1 rounded-lg hover:bg-pink-950/70 text-pink-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1 text-[10px] font-bold border border-pink-900/50"
+        >
+          <Github className="w-3 h-3 text-pink-300" />
+          <span className="hidden sm:inline uppercase">GITHUB EXE</span>
+        </button>
+
         {/* Sound toggle */}
         <button
           onClick={toggleMute}

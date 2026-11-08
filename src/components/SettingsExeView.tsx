@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useBooster } from '../context/BoosterContext.tsx';
-import { downloadOptimizerPackage } from '../utils/exeGenerator.ts';
+import { downloadOptimizerPackage, downloadGitHubReleaseKit } from '../utils/exeGenerator.ts';
 import {
   Download,
   Terminal,
@@ -15,7 +15,13 @@ import {
   Trash2,
   Layers,
   PowerOff,
-  Cpu
+  Cpu,
+  Github,
+  ExternalLink,
+  Copy,
+  Check,
+  FileText,
+  Share2
 } from 'lucide-react';
 import { sound } from '../utils/audio.ts';
 
@@ -37,6 +43,14 @@ export const SettingsExeView: React.FC = () => {
   const [activeDownloadType, setActiveDownloadType] = useState<'exe' | 'bat' | 'ps1'>('exe');
   const [isSimulatingExe, setIsSimulatingExe] = useState(false);
   const [simulationLogs, setSimulationLogs] = useState<string[]>([]);
+  const [githubRepo, setGithubRepo] = useState<string>(() => {
+    return localStorage.getItem('neverdie_github_repo') || 'ARUNNVRDIE/NEVERDIE-BOOSTER';
+  });
+  const [isEditingRepo, setIsEditingRepo] = useState(false);
+  const [tempRepo, setTempRepo] = useState(githubRepo);
+  const [copiedCommand, setCopiedCommand] = useState(false);
+  const [copiedReleaseUrl, setCopiedReleaseUrl] = useState(false);
+
   const [pingResults, setPingResults] = useState<{ region: string; ping: number; status: 'Optimal' | 'Good' }[]>([
     { region: 'Asia / Singapore (Free Fire Prime)', ping: 18, status: 'Optimal' },
     { region: 'India / Mumbai (Free Fire SA)', ping: 14, status: 'Optimal' },
@@ -49,6 +63,49 @@ export const SettingsExeView: React.FC = () => {
   const handleDownload = (type: 'exe' | 'bat' | 'ps1') => {
     sound.playBoostStart();
     downloadOptimizerPackage(selectedEmulator, type);
+  };
+
+  const handleSaveRepo = () => {
+    const cleaned = tempRepo.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '');
+    const finalRepo = cleaned || 'ARUNNVRDIE/NEVERDIE-BOOSTER';
+    setGithubRepo(finalRepo);
+    localStorage.setItem('neverdie_github_repo', finalRepo);
+    setIsEditingRepo(false);
+    sound.playSuccess();
+  };
+
+  const handleDownloadFromGitHub = () => {
+    sound.playBoostStart();
+    downloadOptimizerPackage(selectedEmulator, 'exe');
+    // Open GitHub Releases page
+    window.open(`https://github.com/${githubRepo}/releases`, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleExportReleaseKit = () => {
+    sound.playSuccess();
+    downloadGitHubReleaseKit(selectedEmulator, githubRepo);
+  };
+
+  const [psCommandMode, setPsCommandMode] = useState<'desktop' | 'quick'>('desktop');
+
+  const desktopCommand = `powershell -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $path = Join-Path ([Environment]::GetFolderPath('Desktop')) 'NEVERDIE_BOOSTER_v2.4_SETUP.exe'; Invoke-WebRequest -Uri 'https://github.com/${githubRepo}/releases/latest/download/NEVERDIE_BOOSTER_v2.4_SETUP.exe' -OutFile $path; Start-Process -FilePath $path -Verb RunAs"`;
+  const quickCommand = `iwr -useb "https://github.com/${githubRepo}/releases/latest/download/NEVERDIE_BOOSTER_v2.4_SETUP.exe" -OutFile "$HOME\\Desktop\\NEVERDIE_BOOSTER.exe"; Start-Process "$HOME\\Desktop\\NEVERDIE_BOOSTER.exe" -Verb RunAs`;
+
+  const activeCommand = psCommandMode === 'desktop' ? desktopCommand : quickCommand;
+
+  const copyPowerShellCommand = () => {
+    navigator.clipboard.writeText(activeCommand);
+    setCopiedCommand(true);
+    sound.playClick();
+    setTimeout(() => setCopiedCommand(false), 2200);
+  };
+
+  const copyReleaseUrl = () => {
+    const url = `https://github.com/${githubRepo}/releases/latest/download/NEVERDIE_BOOSTER_v2.4_SETUP.exe`;
+    navigator.clipboard.writeText(url);
+    setCopiedReleaseUrl(true);
+    sound.playClick();
+    setTimeout(() => setCopiedReleaseUrl(false), 2200);
   };
 
   const runExeSimulation = async () => {
@@ -319,6 +376,200 @@ export const SettingsExeView: React.FC = () => {
                   ))
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* Card: GITHUB RELEASES & EXECUTABLE DOWNLOAD HUB (User Request) */}
+          <div className="bg-[#1a0c18] border border-pink-500/40 rounded-2xl p-6 sm:p-7 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 left-6 w-36 h-1 bg-gradient-to-r from-pink-400 via-rose-400 to-pink-300 rounded-b-full shadow-[0_0_12px_rgba(244,63,94,0.8)]" />
+
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-pink-500/20 text-pink-300 border border-pink-500/30">
+                    <Github className="w-5 h-5 text-pink-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black text-pink-100 uppercase tracking-wide flex items-center gap-2">
+                      <span>GITHUB RELEASES & EXECUTABLE HUB</span>
+                    </h3>
+                    <p className="text-xs text-pink-300/70 mt-0.5">
+                      Download NEVERDIE.EXE directly from your GitHub repository or distribute to your community
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <span className="self-start text-[10px] font-black px-2.5 py-1 rounded-full bg-pink-500/20 text-pink-200 border border-pink-500/40 uppercase tracking-wider flex items-center gap-1">
+                <Crown className="w-3 h-3 text-pink-300" />
+                OWNER: ARUNNVRDIE
+              </span>
+            </div>
+
+            {/* Repository Config & Links Bar */}
+            <div className="bg-[#130712] border border-pink-900/60 rounded-xl p-3.5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2 flex-1">
+                <span className="text-xs text-pink-400 font-bold uppercase shrink-0">REPO:</span>
+                {isEditingRepo ? (
+                  <div className="flex items-center gap-2 flex-1">
+                    <input
+                      type="text"
+                      value={tempRepo}
+                      onChange={(e) => setTempRepo(e.target.value)}
+                      placeholder="username/repository"
+                      className="bg-[#220f1e] text-xs text-pink-100 px-2.5 py-1 rounded-lg border border-pink-500/50 focus:outline-none focus:ring-1 focus:ring-pink-400 flex-1 font-mono"
+                    />
+                    <button
+                      onClick={handleSaveRepo}
+                      className="px-2.5 py-1 text-xs font-bold bg-pink-500 hover:bg-pink-400 text-white rounded-lg cursor-pointer"
+                    >
+                      SAVE
+                    </button>
+                    <button
+                      onClick={() => {
+                        setTempRepo(githubRepo);
+                        setIsEditingRepo(false);
+                      }}
+                      className="px-2 py-1 text-xs text-pink-400 hover:text-pink-200 cursor-pointer"
+                    >
+                      CANCEL
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-pink-200 bg-pink-950/60 px-2.5 py-0.5 rounded border border-pink-900/50">
+                      github.com/{githubRepo}
+                    </span>
+                    <button
+                      onClick={() => setIsEditingRepo(true)}
+                      className="text-[10px] font-bold text-pink-400 hover:text-pink-300 underline uppercase cursor-pointer"
+                    >
+                      CHANGE
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={`https://github.com/${githubRepo}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold text-pink-300 hover:text-white px-2.5 py-1 rounded-lg bg-[#241020] hover:bg-[#34162e] border border-pink-900/50 transition-colors flex items-center gap-1"
+                >
+                  <span>REPO</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+                <a
+                  href={`https://github.com/${githubRepo}/releases`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold text-pink-300 hover:text-white px-2.5 py-1 rounded-lg bg-[#241020] hover:bg-[#34162e] border border-pink-900/50 transition-colors flex items-center gap-1"
+                >
+                  <span>RELEASES</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+
+            {/* Action Grid: Direct GitHub EXE Download & Release Kit */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+              {/* Primary Download from GitHub button */}
+              <button
+                onClick={handleDownloadFromGitHub}
+                className="bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 hover:from-pink-400 hover:to-rose-400 text-white font-black tracking-wide text-xs p-4 rounded-xl shadow-[0_4px_20px_rgba(244,63,94,0.4)] uppercase transition-all flex items-center justify-between cursor-pointer group"
+              >
+                <div className="flex items-center gap-3 text-left">
+                  <div className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                    <Download className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-black">DOWNLOAD EXE FROM GITHUB</div>
+                    <div className="text-[10px] text-pink-100/80 font-normal">
+                      NEVERDIE_BOOSTER_v2.4_SETUP.exe
+                    </div>
+                  </div>
+                </div>
+                <Github className="w-5 h-5 text-white/70" />
+              </button>
+
+              {/* Export GitHub Release Kit */}
+              <button
+                onClick={handleExportReleaseKit}
+                className="bg-[#241020] hover:bg-[#34162e] text-pink-100 font-bold tracking-wide text-xs p-4 rounded-xl border border-pink-900/70 hover:border-pink-700 transition-all flex items-center justify-between cursor-pointer group"
+              >
+                <div className="flex items-center gap-3 text-left">
+                  <div className="w-9 h-9 rounded-lg bg-pink-500/15 border border-pink-500/30 flex items-center justify-center shrink-0">
+                    <FileText className="w-5 h-5 text-pink-300" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-pink-100">EXPORT GITHUB RELEASE KIT</div>
+                    <div className="text-[10px] text-pink-300/60 font-normal">
+                      README.md with badges & release guide
+                    </div>
+                  </div>
+                </div>
+                <Download className="w-4 h-4 text-pink-400 transition-transform group-hover:translate-y-0.5" />
+              </button>
+            </div>
+
+            {/* Direct 1-Line PowerShell Command For Community & Players */}
+            <div className="bg-[#120811] border border-pink-900/60 rounded-xl p-3.5 space-y-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-pink-300 uppercase flex items-center gap-1.5">
+                    <Terminal className="w-3.5 h-3.5 text-pink-400" />
+                    DIRECT POWERSHELL DOWNLOAD COMMAND
+                  </span>
+                  {/* Mode switcher */}
+                  <div className="flex items-center p-0.5 rounded-lg bg-[#220f1e] border border-pink-900/50 text-[10px] font-bold">
+                    <button
+                      onClick={() => setPsCommandMode('desktop')}
+                      className={`px-2 py-0.5 rounded-md cursor-pointer transition-colors ${
+                        psCommandMode === 'desktop'
+                          ? 'bg-pink-500 text-white shadow-sm'
+                          : 'text-pink-300/70 hover:text-pink-200'
+                      }`}
+                    >
+                      Desktop + Admin
+                    </button>
+                    <button
+                      onClick={() => setPsCommandMode('quick')}
+                      className={`px-2 py-0.5 rounded-md cursor-pointer transition-colors ${
+                        psCommandMode === 'quick'
+                          ? 'bg-pink-500 text-white shadow-sm'
+                          : 'text-pink-300/70 hover:text-pink-200'
+                      }`}
+                    >
+                      Quick 1-Liner
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={copyPowerShellCommand}
+                  className="text-[11px] font-bold text-pink-300 hover:text-white px-2.5 py-1 rounded-lg bg-pink-950/80 hover:bg-pink-900/80 border border-pink-800/60 transition-all flex items-center gap-1 cursor-pointer shadow-sm"
+                >
+                  {copiedCommand ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-emerald-300">COMMAND COPIED!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>COPY POWERSHELL COMMAND</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="p-3 rounded-lg bg-[#0d040c] border border-pink-950 font-mono text-[11px] text-pink-200/90 break-all select-all flex items-center justify-between gap-2 shadow-inner">
+                <span>{activeCommand}</span>
+              </div>
+              <p className="text-[10px] text-pink-400/80 leading-relaxed">
+                💡 <strong>How to use on your PC:</strong> Press <kbd className="px-1 py-0.5 rounded bg-pink-950 border border-pink-800 text-pink-200">Win + X</kbd> &gt; open <strong>Terminal / PowerShell</strong>, paste this command, and press <kbd className="px-1 py-0.5 rounded bg-pink-950 border border-pink-800 text-pink-200">Enter</kbd>. It directly downloads <strong className="text-pink-200 font-mono">NEVERDIE_BOOSTER_v2.4_SETUP.exe</strong> from your GitHub to your PC Desktop and starts optimization automatically.
+              </p>
             </div>
           </div>
         </div>

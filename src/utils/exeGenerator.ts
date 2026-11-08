@@ -237,6 +237,68 @@ Read-Host
 `;
 };
 
+export const generateGitHubReleaseReadme = (targetEmulator: string = 'MSI 5', repoName: string = 'ARUNNVRDIE/NEVERDIE-BOOSTER'): string => {
+  return `# 🌸 NEVERDIE BOOSTER v2.4 (SAKURA EDITION)
+### 👑 Created & Owned by **ARUNNVRDIE**
+> **Extreme Free Fire & Emulator FPS Optimizer for Windows 10/11 & Low-End Laptops**
+
+[![GitHub Release](https://img.shields.io/badge/release-v2.4.0-ff75a0.svg?style=for-the-badge&logo=github)](https://github.com/${repoName}/releases)
+[![Free Fire](https://img.shields.io/badge/Free%20Fire-120%20FPS%20Locked-ff2d55.svg?style=for-the-badge)](https://github.com/${repoName})
+[![Target](https://img.shields.io/badge/Target-${encodeURIComponent(targetEmulator.toUpperCase())}-ff75a0.svg?style=for-the-badge)](https://github.com/${repoName})
+[![Owner](https://img.shields.io/badge/OWNER-ARUNNVRDIE-yellow.svg?style=for-the-badge)](https://github.com/${repoName})
+
+---
+
+## ⚡ Direct Download Links
+Download the standalone executable or scripts directly from this GitHub Release:
+
+- 🚀 **[Download NEVERDIE_BOOSTER_v2.4_SETUP.exe](https://github.com/${repoName}/releases/latest/download/NEVERDIE_BOOSTER_v2.4_SETUP.exe)** (Standalone Windows Executable)
+- 📜 **[Download NEVERDIE_BOOSTER_QUICKBOOST.bat](https://github.com/${repoName}/releases/latest/download/NEVERDIE_BOOSTER_QUICKBOOST.bat)** (Instant Batch Optimizer)
+- 🛡️ **[Download NEVERDIE_BOOSTER_TURBO_ENGINE.ps1](https://github.com/${repoName}/releases/latest/download/NEVERDIE_BOOSTER_TURBO_ENGINE.ps1)** (PowerShell Turbo Suite)
+
+---
+
+## 💻 1-Line PowerShell Direct Download to PC (Recommended)
+You can directly download and launch **NEVERDIE BOOSTER v2.4** on your PC without opening a web browser. Simply open **Windows PowerShell** (Press \`Win + X\` > **Terminal / PowerShell**) and run any of these commands:
+
+### Option 1: Download to Desktop & Run with Administrator Elevation (Recommended)
+\`\`\`powershell
+powershell -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $path = Join-Path ([Environment]::GetFolderPath('Desktop')) 'NEVERDIE_BOOSTER_v2.4_SETUP.exe'; Write-Host '🌸 Downloading NEVERDIE BOOSTER from GitHub...' -ForegroundColor Magenta; Invoke-WebRequest -Uri 'https://github.com/${repoName}/releases/latest/download/NEVERDIE_BOOSTER_v2.4_SETUP.exe' -OutFile $path; Write-Host '✨ Download Complete! Launching as Administrator...' -ForegroundColor Green; Start-Process -FilePath $path -Verb RunAs"
+\`\`\`
+
+### Option 2: Short 1-Liner (Saves to Desktop)
+\`\`\`powershell
+iwr -useb "https://github.com/${repoName}/releases/latest/download/NEVERDIE_BOOSTER_v2.4_SETUP.exe" -OutFile "$HOME\\Desktop\\NEVERDIE_BOOSTER.exe"; Start-Process "$HOME\\Desktop\\NEVERDIE_BOOSTER.exe" -Verb RunAs
+\`\`\`
+
+### Option 3: Instant Run (Temp Directory)
+\`\`\`powershell
+iwr -useb "https://github.com/${repoName}/releases/latest/download/NEVERDIE_BOOSTER_v2.4_SETUP.exe" -OutFile "$env:TEMP\\NEVERDIE_BOOSTER.exe"; Start-Process "$env:TEMP\\NEVERDIE_BOOSTER.exe"
+\`\`\`
+
+---
+
+## 🌟 Key Features
+- **🧹 Deep Dormant Apps Purger**: Terminates idle background apps (DiagTrack, SysMain, WSearch, WerSvc, Edge WebView2) and reclaims **2.6+ GB of RAM**.
+- **⚡ Forced Dedicated GPU**: Allocates discrete NVIDIA GeForce / AMD Radeon GPU directly to \`${targetEmulator.toUpperCase()}\` and \`HD-Player.exe\`.
+- **🎯 Dual-FPS Synchronization**:
+  - **Internal Emulator FPS**: Unlocks 120 / 240 FPS inside Android & Garena Free Fire engine.
+  - **External PC FPS**: Direct3D presentation synchronized to 144 / 240 Hz monitor refresh rate.
+- **⏱️ 0.500ms Multimedia Timer Resolution**: Unlocks instantaneous bullet hit registration in Free Fire.
+- **🌐 Network & DNS Flushing**: Sub-18ms ping stabilization, \`ipconfig /flushdns\`, and TCPNoDelay enabled.
+
+---
+
+## 🛠️ How to Publish This Release on GitHub
+1. Create a repository at \`https://github.com/${repoName}\`
+2. Go to **Releases** > **Draft a new release**
+3. Set Tag: \`v2.4.0\`
+4. Title: \`NEVERDIE BOOSTER v2.4 - SAKURA EDITION (OWNER: ARUNNVRDIE)\`
+5. Drag and drop \`NEVERDIE_BOOSTER_v2.4_SETUP.exe\`, \`QUICKBOOST.bat\`, and \`TURBO.ps1\` into the binaries upload box.
+6. Click **Publish release**!
+`;
+};
+
 export const downloadOptimizerPackage = (targetEmulator: string, type: 'bat' | 'ps1' | 'exe') => {
   let content = '';
   let filename = '';
@@ -263,6 +325,19 @@ export const downloadOptimizerPackage = (targetEmulator: string, type: 'bat' | '
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+export const downloadGitHubReleaseKit = (targetEmulator: string, repoName: string = 'ARUNNVRDIE/NEVERDIE-BOOSTER') => {
+  const readmeContent = generateGitHubReleaseReadme(targetEmulator, repoName);
+  const blob = new Blob([readmeContent], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `README_GITHUB_RELEASE_v2.4.md`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

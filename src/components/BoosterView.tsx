@@ -13,7 +13,8 @@ import {
   Monitor,
   Flame,
   HelpCircle,
-  PowerOff
+  PowerOff,
+  Github
 } from 'lucide-react';
 import { sound } from '../utils/audio.ts';
 
@@ -37,6 +38,7 @@ export const BoosterView: React.FC = () => {
     triggerAutoConfig,
     connectEmulator,
     disconnectEmulator,
+    setActiveTab,
   } = useBooster();
 
   const [showLogs, setShowLogs] = useState(false);
