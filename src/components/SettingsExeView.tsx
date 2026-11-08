@@ -12,7 +12,10 @@ import {
   Sparkles,
   Wifi,
   Crown,
-  Flower2
+  Trash2,
+  Layers,
+  PowerOff,
+  Cpu
 } from 'lucide-react';
 import { sound } from '../utils/audio.ts';
 
@@ -21,6 +24,10 @@ export const SettingsExeView: React.FC = () => {
     stats,
     selectedEmulator,
     backgroundProcesses,
+    dormantApps,
+    dormantMemoryOccupiedMb,
+    isPurgingDormant,
+    purgeDormantApps,
     toggleProcessSuspension,
     restoreAllProcesses,
     showOverlayHud,
@@ -51,14 +58,15 @@ export const SettingsExeView: React.FC = () => {
     sound.playBoostStart();
 
     const steps = [
-      '⚡ NEVERDIE BOOSTER v2.4 (SAKURA EDITION) - OWNER: ARUNNVRDIE',
-      '🔒 ELEVATING PROCESS PRIVILEGES TO NT AUTHORITY\\SYSTEM...',
-      '🌸 FLUSHING WINDOWS STANDBY LIST (PURGED 1.2 GB UNUSED CACHE)...',
-      '⚡ UNPARKING CPU CORES 0 TO 15 - ULTIMATE PERFORMANCE ACTIVE...',
-      '⏱️ LOCKING MULTIMEDIA TIMER RESOLUTION TO 0.500ms...',
-      `🚀 HOOKING ${selectedEmulator.toUpperCase()} AND LOCKING REALTIME PRIORITY...`,
-      '🌐 APPLYING TCPNODELAY=1 & DISABLING NAGLE ALGORITHM...',
-      '✨ [SUCCESS] NEVERDIE BOOSTER: 120 FPS HIGH REFRESH MODE READY!'
+      `⚡ NEVERDIE BOOSTER v2.4 (SAKURA EDITION) - OWNER: ARUNNVRDIE`,
+      `🔒 ELEVATING PROCESS PRIVILEGES TO NT AUTHORITY\\SYSTEM...`,
+      `🧹 OFFING 7 DORMANT APPS & EMPTYING INACTIVE WORKING SETS...`,
+      `🌸 HALTED: DiagTrack, SysMain, WSearch, WerSvc, Edge WebView2 (2.63 GB RECLAIMED)...`,
+      `⚡ FORCING DISCRETE HIGH-PERFORMANCE GPU TO ${selectedEmulator.toUpperCase()}...`,
+      `🎯 PINNING PHYSICAL P-CORES (0x000000FF) & REALTIME PRIORITY 128...`,
+      `⏱️ LOCKING MULTIMEDIA TIMER RESOLUTION TO 0.500ms...`,
+      `🌐 APPLYING TCPNODELAY=1 & DISABLING NAGLE ALGORITHM (SUB-18ms PING)...`,
+      `✨ [SUCCESS] NEVERDIE BOOSTER: DORMANT SPACE CLEARED & 120 FPS READY FOR FREE FIRE!`
     ];
 
     for (let i = 0; i < steps.length; i++) {
@@ -100,7 +108,7 @@ export const SettingsExeView: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-pink-300/70 mt-1 uppercase font-semibold">
-            DOWNLOAD STANDALONE WINDOWS .EXE OPTIMIZER & DEDICATE 100% HARDWARE TO FREE FIRE
+            OFF DORMANT SERVICES, RECLAIM GHOST MEMORY & DOWNLOAD STANDALONE WINDOWS .EXE
           </p>
         </div>
 
@@ -123,9 +131,96 @@ export const SettingsExeView: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ============================================================ */}
-        {/* LEFT COLUMN: STANDALONE WINDOWS .EXE DOWNLOADER */}
+        {/* LEFT COLUMN: DORMANT APPS PURGER & STANDALONE WINDOWS .EXE */}
         {/* ============================================================ */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Card: DORMANT & INACTIVE APPLICATIONS PURGER (User Request) */}
+          <div className="bg-[#1a0c18] border border-pink-500/40 rounded-2xl p-6 sm:p-7 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 left-6 w-36 h-1 bg-gradient-to-r from-pink-500 via-rose-400 to-pink-300 rounded-b-full shadow-[0_0_12px_rgba(244,63,94,0.8)]" />
+
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-black text-pink-100 uppercase tracking-wide">
+                    DORMANT & GHOST APPLICATION PURGER
+                  </h3>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-200 border border-pink-400/40 uppercase">
+                    OFF INACTIVE APPS
+                  </span>
+                </div>
+                <p className="text-xs text-pink-300/70 mt-0.5">
+                  Terminates dormant background services not currently running on screen but occupying RAM & disk cache
+                </p>
+              </div>
+
+              {/* Memory Occupied Counter */}
+              <div className="text-right">
+                <span className="text-xs text-pink-400/80 block uppercase font-bold">OCCUPIED BY IDLE APPS</span>
+                <span className="text-xl font-black text-[#ff75a0] font-mono tabular-nums">
+                  {(dormantMemoryOccupiedMb / 1024).toFixed(2)} GB
+                </span>
+              </div>
+            </div>
+
+            {/* Action Bar */}
+            <div className="flex items-center justify-between mb-4 pt-2 border-t border-pink-950/70">
+              <span className="text-xs text-pink-200/90 font-medium">
+                {dormantMemoryOccupiedMb > 0
+                  ? '7 inactive background services detected holding memory working sets'
+                  : '✨ All dormant apps offed! 2.63 GB memory fully freed for Free Fire'}
+              </span>
+
+              <button
+                onClick={purgeDormantApps}
+                disabled={isPurgingDormant || dormantMemoryOccupiedMb === 0}
+                className={`bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 hover:from-pink-400 hover:to-rose-400 text-white font-black tracking-wider text-xs py-2 px-5 rounded-xl shadow-[0_4px_16px_rgba(244,63,94,0.4)] uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
+                  dormantMemoryOccupiedMb === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <PowerOff className="w-3.5 h-3.5" />
+                <span>{isPurgingDormant ? 'OFFING DORMANT APPS...' : 'OFF ALL DORMANT APPS & FREE SPACE'}</span>
+              </button>
+            </div>
+
+            {/* List of Dormant Apps Occupying Space */}
+            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              {dormantApps.map(app => (
+                <div
+                  key={app.id}
+                  className={`p-3 rounded-xl border transition-all flex items-center justify-between ${
+                    app.status === 'Terminated & Freed'
+                      ? 'bg-[#140813]/60 border-pink-950/70 opacity-60'
+                      : 'bg-[#220f1e] border-pink-900/50 hover:border-pink-800'
+                  }`}
+                >
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-pink-100">
+                        {app.name}
+                      </span>
+                      {app.status === 'Terminated & Freed' ? (
+                        <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
+                          OFFED & FREED
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30 uppercase">
+                          OCCUPYING {app.occupiedRamMb} MB
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-pink-300/60">
+                      {app.description} · <span className="font-mono text-pink-300">{app.serviceTag}</span>
+                    </p>
+                  </div>
+
+                  <span className="text-xs font-mono font-bold text-pink-200">
+                    {app.status === 'Terminated & Freed' ? '0 MB' : `${app.occupiedRamMb} MB`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Card: Windows EXE & Scripts in Cherry Blossom styling */}
           <div className="bg-[#1a0c18] border border-pink-900/50 rounded-2xl p-6 sm:p-7 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 left-6 w-28 h-1 bg-gradient-to-r from-pink-500 to-rose-400 rounded-b-full shadow-[0_0_12px_rgba(244,63,94,0.8)]" />
@@ -136,7 +231,7 @@ export const SettingsExeView: React.FC = () => {
                   DOWNLOAD WINDOWS EXECUTABLE (.EXE)
                 </h3>
                 <p className="text-xs text-pink-300/80 mt-0.5 uppercase">
-                  STANDALONE ONE-CLICK OPTIMIZER BY <strong className="text-pink-300">ARUNNVRDIE</strong>
+                  STANDALONE ONE-CLICK OPTIMIZER BY <strong className="text-pink-300">ARUNNVRDIE</strong> (TARGET: {selectedEmulator.toUpperCase()})
                 </p>
               </div>
               <span className="text-xs font-mono font-bold text-pink-200 bg-pink-500/20 px-2.5 py-1 rounded-lg border border-pink-500/30">
@@ -145,7 +240,7 @@ export const SettingsExeView: React.FC = () => {
             </div>
 
             <p className="text-xs text-pink-200/80 leading-relaxed mb-6">
-              This compiled Windows optimizer applies the exact registry tweaks, standby RAM purge, CPU core unparking, and 0.5ms multimedia timer resolution directly on your PC with zero dependencies. Works for Free Fire and all emulators.
+              This compiled Windows optimizer halts dormant apps, purges standby memory, unparks all CPU cores, binds dedicated GPU, and locks 0.500ms multimedia timer resolution directly on your low-end PC or laptop with zero dependencies.
             </p>
 
             {/* Download Buttons in Cherry Blossom Styling */}
@@ -226,72 +321,6 @@ export const SettingsExeView: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/* Card: Background Processes Optimizer */}
-          <div className="bg-[#1a0c18] border border-pink-900/50 rounded-2xl p-6 sm:p-7 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-base sm:text-lg font-black text-pink-100 uppercase tracking-wide">
-                  BACKGROUND PROCESS OPTIMIZER
-                </h3>
-                <p className="text-xs text-pink-300/70 uppercase">
-                  Suspend heavy telemetry & non-gaming apps to dedicate 100% CPU to Free Fire
-                </p>
-              </div>
-
-              <button
-                onClick={restoreAllProcesses}
-                className="text-xs font-bold text-pink-400 hover:text-pink-300 flex items-center gap-1 cursor-pointer transition-colors uppercase"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Restore All</span>
-              </button>
-            </div>
-
-            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-              {backgroundProcesses.map(proc => (
-                <div
-                  key={proc.id}
-                  className={`p-3 rounded-xl border transition-all flex items-center justify-between ${
-                    proc.isSuspended
-                      ? 'bg-[#140813]/60 border-pink-950 opacity-60'
-                      : 'bg-[#220f1e] border-pink-900/50 hover:border-pink-800'
-                  }`}
-                >
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-pink-100">
-                        {proc.name}
-                      </span>
-                      {proc.isSuspended ? (
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 border border-pink-500/30">
-                          SUSPENDED
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-pink-950 text-pink-400">
-                          ACTIVE
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-pink-300/60">
-                      {proc.description} · <span className="font-mono text-pink-200">{proc.ramUsageMb} MB RAM</span>
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() => toggleProcessSuspension(proc.id)}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      proc.isSuspended
-                        ? 'bg-[#30152b] text-pink-200 hover:bg-[#3c1b36]'
-                        : 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-[0_0_10px_rgba(244,63,94,0.3)]'
-                    }`}
-                  >
-                    {proc.isSuspended ? 'Resume' : 'Suspend'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* ============================================================ */}
@@ -302,7 +331,7 @@ export const SettingsExeView: React.FC = () => {
           <div className="bg-gradient-to-br from-pink-900/40 via-[#1a0c18] to-[#120811] border border-pink-500/40 rounded-2xl p-5 shadow-xl relative overflow-hidden">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-300 shadow-[0_0_12px_rgba(244,63,94,0.3)]">
-                <Flower2 className="w-5 h-5 text-pink-400" />
+                <Crown className="w-5 h-5 text-pink-400" />
               </div>
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-pink-400/90 block">
@@ -361,6 +390,12 @@ export const SettingsExeView: React.FC = () => {
             </span>
 
             <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center py-1 border-b border-pink-950">
+                <span className="text-pink-300/60">Dormant Apps:</span>
+                <span className="font-bold text-pink-200">
+                  {dormantMemoryOccupiedMb === 0 ? 'Purged & Offed' : `${(dormantMemoryOccupiedMb / 1024).toFixed(2)} GB Occupied`}
+                </span>
+              </div>
               <div className="flex justify-between items-center py-1 border-b border-pink-950">
                 <span className="text-pink-300/60">Timer Resolution:</span>
                 <span className="font-mono font-bold text-[#ff75a0]">

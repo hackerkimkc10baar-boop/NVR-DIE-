@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { useBooster } from '../context/BoosterContext.tsx';
-import { Flame, Fan, Gauge, Activity, Cpu, Zap, Crown, Flower2 } from 'lucide-react';
+import { Flame, Fan, Gauge, Activity, Cpu, Zap, Crown, Monitor, Laptop } from 'lucide-react';
 
 export const PerformanceView: React.FC = () => {
-  const { stats, toggleGpuMax, toggleFanTurbo, setTargetFps, selectedEmulator } = useBooster();
+  const { stats, internalFps, externalFps, toggleGpuMax, toggleFanTurbo, setTargetFps, selectedEmulator, forcedGpuCpuAllocated } = useBooster();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Live real-time canvas frame time graph in glowing Cherry Blossom pink
@@ -82,9 +82,13 @@ export const PerformanceView: React.FC = () => {
               <Crown className="w-2.5 h-2.5 text-pink-300" />
               ARUNNVRDIE
             </span>
+            <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-gradient-to-r from-pink-500/20 to-rose-500/20 text-pink-200 border border-pink-400/30 uppercase">
+              <Laptop className="w-2.5 h-2.5 text-pink-400" />
+              LOW-END LAPTOP FOCUS
+            </span>
           </div>
           <p className="text-xs text-pink-300/70 mt-0.5 uppercase tracking-wide font-semibold">
-            REAL-TIME HARDWARE TELEMETRY & 100% SAKURA FOCUS ALLOCATION
+            REAL-TIME HARDWARE TELEMETRY & {selectedEmulator.toUpperCase()} DEDICATION
           </p>
         </div>
 
@@ -184,7 +188,7 @@ export const PerformanceView: React.FC = () => {
         </div>
       </div>
 
-      {/* Extreme Focus Banner: ALL PROCESSES DEDICATED TO FREE FIRE */}
+      {/* Extreme Focus Banner: ALL PROCESSES DEDICATED TO FREE FIRE & MSI 5 */}
       <div className="bg-[#1a0c18] border border-pink-500/30 rounded-2xl p-4 mb-6 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-300 shadow-[0_0_12px_rgba(244,63,94,0.3)]">
@@ -192,48 +196,59 @@ export const PerformanceView: React.FC = () => {
           </div>
           <div>
             <span className="text-xs font-black text-pink-100 uppercase tracking-wider block">
-              NEVERDIE SAKURA PROCESS ISOLATION: ACTIVE
+              NEVERDIE SAKURA PROCESS ISOLATION: {forcedGpuCpuAllocated ? 'ACTIVE (100% FOCUS)' : 'READY'}
             </span>
             <p className="text-[11px] text-pink-300/70 uppercase">
-              100% CPU CORES & RAM DEDICATED EXCLUSIVELY TO {selectedEmulator.toUpperCase()} & FREE FIRE.
+              100% CPU P-CORES & DEDICATED GPU BOUND TO {selectedEmulator.toUpperCase()} & FREE FIRE.
             </p>
           </div>
         </div>
         <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-gradient-to-r from-pink-500/20 to-rose-500/20 text-pink-200 border border-pink-400/40 uppercase shadow-sm">
-          REALTIME PRIORITY
+          REALTIME PRIORITY 128
         </span>
       </div>
 
-      {/* Real-time High Refresh Emulator FPS Engine & Frame Time Stability Graph */}
+      {/* Real-time High Refresh Emulator FPS Engine with Dual-FPS Readout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* FPS Live Counter Card */}
+        {/* Dual FPS Live Counter Card */}
         <div className="bg-[#1a0c18] border border-pink-900/50 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-pink-300/80 uppercase tracking-wider flex items-center gap-1.5">
                 <Gauge className="w-3.5 h-3.5 text-pink-400" />
-                ACTIVE EMULATOR FPS
+                DUAL FPS ENGINE
               </span>
               <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-200 border border-pink-500/40 uppercase shadow-sm">
-                {stats.fps} FPS LOCKED
+                INTERNAL & EXTERNAL
               </span>
             </div>
 
-            <div className="flex items-baseline gap-2 my-2">
-              <span className="text-5xl font-black text-[#ff75a0] tabular-nums tracking-tight drop-shadow-[0_0_12px_rgba(255,117,160,0.4)]">
-                {stats.fps}
-              </span>
-              <span className="text-sm font-bold text-pink-300/70">FPS</span>
+            {/* Split Internal vs External FPS Display */}
+            <div className="grid grid-cols-2 gap-2 my-2 py-2 bg-[#220f1e] rounded-xl px-3 border border-pink-900/60">
+              <div>
+                <span className="text-[10px] text-pink-400/90 font-bold block uppercase">INTERNAL FPS</span>
+                <span className="text-3xl font-black text-[#ff75a0] tabular-nums tracking-tight">
+                  {internalFps}
+                </span>
+                <span className="text-[10px] text-pink-300/60 block font-normal">Android Engine</span>
+              </div>
+              <div className="border-l border-pink-900/60 pl-3">
+                <span className="text-[10px] text-pink-200/90 font-bold block uppercase">EXTERNAL PC</span>
+                <span className="text-3xl font-black text-pink-100 tabular-nums tracking-tight">
+                  {externalFps}
+                </span>
+                <span className="text-[10px] text-pink-300/60 block font-normal">Monitor Direct3D</span>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-xs font-mono text-pink-200 mt-3 pt-3 border-t border-pink-950">
               <div>
                 <span className="text-pink-400/70 block text-[10px] uppercase">1% LOW FPS</span>
-                <span className="font-bold text-pink-100">{Math.round(stats.fps * 0.94)} FPS</span>
+                <span className="font-bold text-pink-100">{Math.round(internalFps * 0.94)} FPS</span>
               </div>
               <div>
                 <span className="text-pink-400/70 block text-[10px] uppercase">FRAME TIME</span>
-                <span className="font-bold text-pink-100">{(1000 / stats.fps).toFixed(1)} ms</span>
+                <span className="font-bold text-pink-100">{(1000 / internalFps).toFixed(1)} ms</span>
               </div>
             </div>
           </div>

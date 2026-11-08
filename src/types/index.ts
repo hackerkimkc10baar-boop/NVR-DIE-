@@ -1,4 +1,4 @@
-export type NavTab = 'performance' | 'booster' | 'settings_exe';
+export type NavTab = 'performance' | 'booster' | 'network' | 'settings_exe';
 
 export interface SystemStats {
   cpuTemp: number;
@@ -20,6 +20,34 @@ export interface SystemStats {
   fanTurboActive: boolean;
   blueStacksConnected: boolean;
   autoConfigOptimized: boolean;
+}
+
+export interface DnsProvider {
+  id: string;
+  name: string;
+  primaryIp: string;
+  secondaryIp: string;
+  pingMs: number;
+  recommendedFor: string;
+  isPopularGaming: boolean;
+}
+
+export interface FreeFireServerRoute {
+  region: string;
+  code: string;
+  ping: number;
+  jitter: number;
+  packetLoss: number;
+  status: 'Optimal' | 'Stable' | 'Moderate';
+}
+
+export interface DormantApp {
+  id: string;
+  name: string;
+  occupiedRamMb: number;
+  status: 'Occupying RAM (Idle)' | 'Terminated & Freed';
+  serviceTag: string;
+  description: string;
 }
 
 export interface BackgroundProcess {

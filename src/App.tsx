@@ -5,6 +5,7 @@ import { Sidebar } from './components/Sidebar.tsx';
 import { LoginView } from './components/LoginView.tsx';
 import { PerformanceView } from './components/PerformanceView.tsx';
 import { BoosterView } from './components/BoosterView.tsx';
+import { NetworkView } from './components/NetworkView.tsx';
 import { SettingsExeView } from './components/SettingsExeView.tsx';
 import { MouseAnimation } from './components/MouseAnimation.tsx';
 import { FloatingHudOverlay } from './components/FloatingHudOverlay.tsx';
@@ -32,13 +33,14 @@ const MainLayout: React.FC = () => {
           <LoginView />
         ) : (
           <div className="flex-1 flex overflow-hidden relative">
-            {/* 3-Icon Vertical Sidebar matching screenshots in Cherry Blossom theme */}
+            {/* 4-Icon Vertical Sidebar matching screenshots in Cherry Blossom theme */}
             <Sidebar />
 
             {/* Active View */}
             <main className="flex-1 flex flex-col overflow-hidden bg-[#120811] relative">
               {activeTab === 'performance' && <PerformanceView />}
               {activeTab === 'booster' && <BoosterView />}
+              {activeTab === 'network' && <NetworkView />}
               {activeTab === 'settings_exe' && <SettingsExeView />}
             </main>
           </div>

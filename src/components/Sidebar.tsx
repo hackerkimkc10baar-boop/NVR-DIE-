@@ -1,5 +1,5 @@
 import React from 'react';
-import { Monitor, Rocket, Settings } from 'lucide-react';
+import { Monitor, Rocket, Settings, Wifi } from 'lucide-react';
 import { NavTab } from '../types/index.ts';
 import { useBooster } from '../context/BoosterContext.tsx';
 
@@ -16,6 +16,11 @@ export const Sidebar: React.FC = () => {
       id: 'booster',
       label: 'Booster',
       icon: <Rocket className="w-5 h-5" />,
+    },
+    {
+      id: 'network',
+      label: 'Network & Ping',
+      icon: <Wifi className="w-5 h-5" />,
     },
     {
       id: 'settings_exe',
